@@ -17,8 +17,8 @@ spec:
         image: nginx:1.12.1
         resources:
           requests:
-            memory: "100m"
-            cpu: 1
+            memory: "100Mi"
+            cpu: "500m"
         ports:
         - containerPort: 80
         - containerPort: 443
