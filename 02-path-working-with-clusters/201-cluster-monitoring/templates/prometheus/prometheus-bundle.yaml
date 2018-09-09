@@ -20,63 +20,69 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: prometheus-operator
-  namespace: monitoring
 rules:
-- apiGroups:
-  - extensions
-  resources:
-  - thirdpartyresources
-  verbs:
-  - "*"
 - apiGroups:
   - apiextensions.k8s.io
   resources:
   - customresourcedefinitions
   verbs:
-  - "*"
+  - '*'
 - apiGroups:
   - monitoring.coreos.com
   resources:
   - alertmanagers
   - prometheuses
+  - prometheuses/finalizers
+  - alertmanagers/finalizers
   - servicemonitors
+  - prometheusrules
   verbs:
-  - "*"
+  - '*'
 - apiGroups:
   - apps
   resources:
   - statefulsets
-  verbs: ["*"]
-- apiGroups: [""]
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
   resources:
   - configmaps
   - secrets
-  verbs: ["*"]
-- apiGroups: [""]
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
   resources:
   - pods
-  verbs: ["list", "delete"]
-- apiGroups: [""]
+  verbs:
+  - list
+  - delete
+- apiGroups:
+  - ""
   resources:
   - services
   - endpoints
-  verbs: ["get", "create", "update"]
-- apiGroups: [""]
+  verbs:
+  - get
+  - create
+  - update
+- apiGroups:
+  - ""
   resources:
   - nodes
-  verbs: ["list", "watch"]
-- apiGroups: [""]
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - ""
   resources:
   - namespaces
-  verbs: ["list"]
+  verbs:
+  - list
+  - watch
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: prometheus-operator
-  namespace: monitoring
----
-apiVersion: apps/v1
+apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   labels:
@@ -96,8 +102,10 @@ spec:
       containers:
       - args:
         - --kubelet-service=kube-system/kubelet
+        - --logtostderr=true
         - --config-reloader-image=quay.io/coreos/configmap-reload:v0.0.1
-        image: quay.io/coreos/prometheus-operator:v0.14.1
+        - --prometheus-config-reloader=quay.io/coreos/prometheus-config-reloader:v0.23.2
+        image: quay.io/coreos/prometheus-operator:v0.23.2
         name: prometheus-operator
         ports:
         - containerPort: 8080
@@ -105,8 +113,22 @@ spec:
         resources:
           limits:
             cpu: 200m
-            memory: 100Mi
+            memory: 200Mi
           requests:
             cpu: 100m
-            memory: 50Mi
+            memory: 100Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
       serviceAccountName: prometheus-operator
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-operator
+  namespace: monitoring

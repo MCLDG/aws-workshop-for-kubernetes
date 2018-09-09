@@ -1625,13 +1625,13 @@ There is an explicit memory resource defined here. Now, try to create the pod:
 
 This time you'll see an error indicating that Kubernetes is unable to create this pod as it would exceed the ResourceQuota. We can fix this by removing the previous deployment:
 
-	$ kubectl delete -f deployment-cpu-memory.yaml -n dev
+    $ kubectl delete -f deployment-cpu-memory.yaml -n dev
     deployment.apps "nginx-deployment" deleted
 
 Now, try to create the pod again:
 
     $ kubectl apply -f pod-cpu-memory.yaml -n dev
-	pod "nginx-pod" created
+    pod "nginx-pod" created
 
 The Pod is successfully created.
 

@@ -20,6 +20,14 @@ Heapster is limited to Kuberenetes container metrics, it is not general use. Hea
 
 In order to perform exercises in this chapter, you’ll need to deploy configurations to a Kubernetes cluster. To create an EKS-based Kubernetes cluster, use the link:../../01-path-basics/102-your-first-cluster#create-a-kubernetes-cluster-with-eks[AWS CLI] (recommended). If you wish to create a Kubernetes cluster without EKS, you can instead use link:../../01-path-basics/102-your-first-cluster#alternative-create-a-kubernetes-cluster-with-kops[kops].
 
+If you are using EKS, you'll need to define a default storage class for your persistent volume claims.
+
+    kubectl apply -f templates/gp2-storage-class.yaml
+
+After defining the storage class, set it as the default:
+
+    kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
 All configuration files for this chapter are in the link:templates[201-cluster-monitoring/templates] directory.
 
 == Kubernetes Dashboard
