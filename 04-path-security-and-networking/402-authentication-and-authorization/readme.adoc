@@ -22,7 +22,58 @@ In order to perform exercises in this chapter, you’ll need to deploy configura
 
 All configuration files for this chapter are in the `roles` directory.
 
-== IAM Roles for master nodes
+== IAM container roles using kube2iam
+
+link:https://github.com/jtblin/kube2iam[Kube2iam] provides different AWS IAM roles for pods running on Kubernetes based on annotations.
+
+Kube2iam works by intercepting traffic from the containers to the EC2 Metadata API, calling the link:https://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html[AWS Security Token Service (STS)] API to obtain temporary credentials using the pod configured role, then using these temporary credentials to perform the original request.
+
+== IAM container roles using kube2iam for EKS
+
+The process of installing kube2iam on an EKS cluster differs in a couple of ways:
+
+* RBAC is enabled, so RBAC service roles must be installed
+* EKS uses VPC networking and this must be specified in the kube2iam configuration (see the file kube2iam-ds-eks.yaml)
+
+=== Install kube2iam on EKS
+
+The following steps describe how to configure kube2iam on EKS. Before installing kube2iam we need to allow our EKS worker nodes
+to assume other IAM roles. kube2iam will use this to allow EKS pods to assume roles we assign.
+
+. In the AWS IAM console, find the role for your EKS worker node. It will be named something like this `EKS-<cluster name>-DefaultNodeGroup-NodeInstanceRole-34NM9A2E90HE`
+. In the Permissions tab, add an inline policy as follows, with a name of `eks-sts`:
+
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": [
+                    "sts:AssumeRole"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+            }
+        ]
+    }
+
+. Deploy the RBAC service accounts:
++
+    $ kubectl apply -f templates/kube2iam-rbac.yaml
++
+. Deploy kube2iam:
+
+    $ kubectl apply -f templates/kube2iam-ds-eks.yaml
+    daemonset "kube2iam" created
+
+=== IAM roles for worker nodes - non EKS
+
+We need the link:https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html[Amazon Resource Name (ARN)] of the IAM Role assigned to the worker nodes.  We will need this as part of creating pod roles.
+
+This is the same role you updated in the IAM console in the previous step. Note that we need the value of the Role ARN field.
+
+Once you arrive at this point, continue at the step link:Create the Pod IAM role[Create the Pod IAM role] below.
+
+== IAM container roles using kube2iam for Kops
 
 Kubernetes cluster created using kops has two IAM roles - one for all master nodes and one for all worker nodes. The master IAM role is associated with a number of policies related to EC2, Elastic Load Balancer (ELB), EC2 Container Registry (ECR), Route53, and Key Management Service (KMS). The worker nodes require a number of EC2, ECR, and Route53 policies applied. kops automatically configures these roles and policies for you (see link:https://github.com/kubernetes/kops/blob/master/docs/iam_roles.md[here] for a full list).
 
@@ -64,13 +115,7 @@ In a similar fashion, policies may be applied to all masters by setting the `add
 
 Once again, the cluster needs to be updated for these changes to take effect.
 
-== IAM container roles using kube2iam
-
-link:https://github.com/jtblin/kube2iam[Kube2iam] provides different AWS IAM roles for pods running on Kubernetes based on annotations.
-
-Kube2iam works by intercepting traffic from the containers to the EC2 Metadata API, calling the link:https://docs.aws.amazon.com/STS/latest/APIReference/Welcome.html[AWS Security Token Service (STS)] API to obtain temporary credentials using the pod configured role, then using these temporary credentials to perform the original request.
-
-=== Install kube2iam
+=== Install kube2iam for Kops
 
 The following steps describe how to configure kube2iam:
 
@@ -99,14 +144,15 @@ The following steps describe how to configure kube2iam:
     $ kubectl apply -f templates/kube2iam-ds.yaml
     daemonset "kube2iam" created
 +
-    For EKS
+    For EKS and for clusters where RBAC is enabled:
 +
+    $ kubectl apply -f templates/kube2iam-rbac.yaml
     $ kubectl apply -f templates/kube2iam-ds-eks.yaml
     daemonset "kube2iam" created
 +
-Note that the `kube2iam-ds.yaml` is assuming that your network configuration is based on `kubenet`, which is also the default kops configuration. If you have changed this as part of another exercise (e.g. switched to Calico) you will need to change the value of the `--host-interface` arg in the configuration file. For example, set to `cal+` if using Calico.
+Note that the `kube2iam-ds.yaml` is assuming that your network configuration is based on `kubenet`, which is also the default kops configuration. If you have changed this as part of another exercise (e.g. switched to Calico) you will need to change the value of the `--host-interface` arg in the configuration file. For example, set to `cal+` if using Calico, or `eni+` if using AWS VPC networking.
 
-=== IAM roles for worker nodes
+=== IAM roles for worker nodes for Kops
 
 It is necessary to create an IAM role which can assume other roles and assign it to each Kubernetes worker.
 
@@ -131,6 +177,8 @@ It shows an output like:
   ]
 
 Note down the ARN from this output.
+
+== Create the Pod IAM role
 
 Edit the `templates/pod-role-trust-policy.json` file, replace `{{NodeIAMRoleARN}}` with the IAM Role ARN obtained from the previous step.
 
@@ -174,7 +222,7 @@ It shows an output as:
       }
   }
 
-=== Test the Pod with IAM role
+== Test the Pod with IAM role
 
 `iam.amazonaws.com/role` annotation on the pod is used to assign an IAM role to a pod. Let's set this annotation on our pod. The `templates/pod-with-kube2iam.yaml` file looks like:
 
@@ -241,6 +289,15 @@ To govern what roles a pod can assume, you can use the `iam.amazonaws.com/allowe
     namespace "default" configured
 
 From now on, pods in the default namespace will only be able to optain the `MyPodRole`.
+
+=== Cleanup
+
+    $ kubectl delete -f templates/pod-with-kube2iam.yaml
+    $ aws iam delete-role --role-name MyPodRole
+    $ kubectl delete -f templates/kube2iam-ds-eks.yaml
+    $ kubectl delete -f templates/kube2iam-rbac.yaml
+
+You should also delete the inline policy `eks-sts` from your EKS worker node.
 
 == IAM container roles using Hashicorp Vault
 
