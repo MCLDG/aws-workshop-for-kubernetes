@@ -94,9 +94,14 @@ The following steps describe how to configure kube2iam:
 
   kops update cluster example.cluster.k8s.local --yes
 
-. Deploy kube2iam as a DaemonSet:
+. Deploy kube2iam as a DaemonSet. You will use a different YAML file if you are using EKS:
 +
     $ kubectl apply -f templates/kube2iam-ds.yaml
+    daemonset "kube2iam" created
++
+    For EKS
++
+    $ kubectl apply -f templates/kube2iam-ds-eks.yaml
     daemonset "kube2iam" created
 +
 Note that the `kube2iam-ds.yaml` is assuming that your network configuration is based on `kubenet`, which is also the default kops configuration. If you have changed this as part of another exercise (e.g. switched to Calico) you will need to change the value of the `--host-interface` arg in the configuration file. For example, set to `cal+` if using Calico.

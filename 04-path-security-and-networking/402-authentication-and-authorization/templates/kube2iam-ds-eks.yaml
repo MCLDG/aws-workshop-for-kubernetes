@@ -19,7 +19,7 @@ spec:
           name: kube2iam
           args:
             - "--auto-discover-base-arn"
-            - "--host-interface=cbr0"
+            - "--host-interface=eni+"
             - "--host-ip=$(HOST_IP)"
             - "--iptables=true"
           env:
