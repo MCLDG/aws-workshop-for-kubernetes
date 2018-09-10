@@ -56,22 +56,25 @@ to assume other IAM roles. kube2iam will use this to allow EKS pods to assume ro
         ]
     }
 
-. Deploy the RBAC service accounts:
+. Back in your terminal, deploy the RBAC service accounts:
 +
     $ kubectl apply -f templates/kube2iam-rbac.yaml
+    serviceaccount "kube2iam" created
+    clusterrole.rbac.authorization.k8s.io "kube2iam" created
+    clusterrolebinding.rbac.authorization.k8s.io "kube2iam" created
 +
 . Deploy kube2iam:
 
     $ kubectl apply -f templates/kube2iam-ds-eks.yaml
-    daemonset "kube2iam" created
+    daemonset.apps "kube2iam" created
 
-=== IAM roles for worker nodes - non EKS
+=== Get the IAM role for the EKS worker nodes
 
 We need the link:https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html[Amazon Resource Name (ARN)] of the IAM Role assigned to the worker nodes.  We will need this as part of creating pod roles.
 
 This is the same role you updated in the IAM console in the previous step. Note that we need the value of the Role ARN field.
 
-Once you arrive at this point, continue at the step link:Create the Pod IAM role[Create the Pod IAM role] below.
+Once you arrive at this point, continue at the step link:create-the-pod-iam-role[Create the Pod IAM role] below.
 
 == IAM container roles using kube2iam for Kops
 
