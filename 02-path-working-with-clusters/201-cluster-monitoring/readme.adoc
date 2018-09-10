@@ -290,7 +290,16 @@ Lets wait for grafana to come up:
 
 === Grafana Dashboard
 
-Lets forward the grafana dashboard to a local port:
+Lets forward the grafana dashboard to a local port. If you are using Cloud9, it's easier to forward to port 8080:
+
+Use this for Cloud9:
+
+  $ kubectl -n monitoring port-forward $(kubectl -n monitoring get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 8080:3000
+  Forwarding from 127.0.0.1:8080 -> 3000
+
+In Cloud9, select Preview->Preview Running Application to view the Grafana dashboard.
+
+Otherwise, if you are using your laptop you can use:
 
   $ kubectl port-forward $(kubectl get pod -l app=grafana -o jsonpath={.items[0].metadata.name} -n monitoring) 3000 -n monitoring
   Forwarding from 127.0.0.1:3000 -> 3000

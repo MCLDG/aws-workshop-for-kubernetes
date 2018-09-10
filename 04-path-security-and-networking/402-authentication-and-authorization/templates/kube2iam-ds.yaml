@@ -15,7 +15,7 @@ spec:
     spec:
       hostNetwork: true
       containers:
-        - image: jtblin/kube2iam:0.8.1
+        - image: jtblin/kube2iam:0.10.3
           name: kube2iam
           args:
             - "--auto-discover-base-arn"

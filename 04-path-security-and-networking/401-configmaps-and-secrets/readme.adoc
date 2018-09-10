@@ -252,6 +252,22 @@ The pod configuration file looks like:
       ports:
       - containerPort: 8080
 
+. Check that the value from the ConfigMap exists as an ENV variable in the pods container. First, exec into the container:
+
+  $ kubectl exec -it app-pod  bash
+
+Once inside the container, note the `COUNT` variable:
+
+    # env
+    NODE_VERSION=6.11.4
+    HOSTNAME=app-pod
+    .
+    .
+    COUNT=2
+    KUBERNETES_PORT_443_TCP_ADDR=10.100.0.1
+    KUBERNETES_PORT_443_TCP=tcp://10.100.0.1:443
+    _=/usr/bin/env
+
 . Observe logs from the pod:
 
   $ kubectl logs -f app-pod
