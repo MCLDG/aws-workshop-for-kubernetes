@@ -74,7 +74,7 @@ We need the link:https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-name
 
 This is the same role you updated in the IAM console in the previous step. Note that we need the value of the Role ARN field.
 
-Once you arrive at this point, continue at the step link:create-the-pod-iam-role[Create the Pod IAM role] below.
+Once you arrive at this point, continue at the step link:#create-the-pod-iam-role[Create the Pod IAM role] below.
 
 == IAM container roles using kube2iam for Kops
 
