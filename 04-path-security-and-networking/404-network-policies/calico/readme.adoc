@@ -68,6 +68,18 @@ Now apply the NetworkPolicy:
 
 The refresh the browser page and view the UI.
 
+Cleanup:
+
+  kubectl delete -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/00-namespace.yaml
+  kubectl delete -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/01-management-ui.yaml
+  kubectl delete -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/02-backend.yaml
+  kubectl delete -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/03-frontend.yaml
+  kubectl delete -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/04-client.yaml
+  kubectl delete -f templates/management-svc.yaml
+  kubectl delete ns client stars management-ui
+  kubectl delete -f https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/master/config/v1.0/calico.yaml
+
+
 == Creating a new Kops cluster using Calico networking
 
 You can create a new cluster and use kops CLI options to specify the networking mode as shown below:
