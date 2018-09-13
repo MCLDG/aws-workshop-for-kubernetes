@@ -38,10 +38,39 @@ use the standard EKS VPC networking.
     NAME          DESIRED   CURRENT   READY     UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
     calico-node   2         2         2         2            2           <none>          42s
 
+Deploy an application to demonstrate NetworkPolicy. This consists of 3 parts: a client, a frontend and a backend. We will
+implement NetworkPolicy and see the effect it has on the communication paths between the components.
+
+  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/00-namespace.yaml
+  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/01-management-ui.yaml
+  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/02-backend.yaml
+  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/03-frontend.yaml
+  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/manifests/04-client.yaml
+
+Create an ELB to access the UI:
+
+  kubectl apply -f templates/management-svc.yaml
+
+Wait for the ELB to be created:
+
+  kubectl describe svc management-ui -n management-ui
+
+Once the ELB is ready, copy the ELB DNS into a browser and view the UI.
+
+Now apply the NetworkPolicy:
+
+  kubectl apply -n stars -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/policies/default-deny.yaml
+  kubectl apply -n client -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/policies/default-deny.yaml
+  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/policies/allow-ui.yaml
+  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/policies/allow-ui-client.yaml
+  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/policies/backend-policy.yaml
+  kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/tutorials/stars-policy/policies/frontend-policy.yaml
+
+The refresh the browser page and view the UI.
 
 == Creating a new Kops cluster using Calico networking
 
-Alternatively, you can create a new cluster and use kops CLI options to specify the networking mode as shown below:
+You can create a new cluster and use kops CLI options to specify the networking mode as shown below:
 
   kops create cluster \
     --name example2.cluster.k8s.local \
@@ -67,15 +96,17 @@ This will show the following fragment under `.spec`:
 
 == Installing Calico on an existing Kops cluster
 
+You can also install Calico on an existing Kops cluster.
+
 This chapter uses a cluster with 3 master nodes and 5 worker nodes as described here: link:../../cluster-install#multi-master-multi-node-multi-az-gossip-based-cluster[multi-master, multi-node gossip based cluster].
 
-The of the chapter goes with the assumption that you are using an existing cluster.
+The rest of the chapter goes with the assumption that you are using an existing cluster.
 
 NOTE: A smaller sized cluster, with 1 master node and 2 worker nodes, is chosen here. This is to minimize the amount of time for rolling update the cluster later. It typically takes 5-6 mins per node for rolling update.
 
 All configuration files for this chapter are in the `calico` directory. Make sure you change to that directory before giving any commands in this chapter.
 
-== Installation
+=== Installation
 
 Edit the Kubernetes cluster configuration using the command:
 
