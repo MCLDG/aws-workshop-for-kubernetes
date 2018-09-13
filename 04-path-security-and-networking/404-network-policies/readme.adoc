@@ -109,6 +109,22 @@ Let's now create a Network Policy, but we will not configure any rules which by 
   $ kubectl create -f templates/deny-all-by-default-network-policy.yaml --namespace=ns-1
   networkpolicy "deny-all-by-default" created
 
+Review the Network Policy. You can see that it does not allow any ingress or egress traffic:
+
+    $ kubectl describe networkpolicy -n ns-1
+    Name:         deny-all-by-default
+    Namespace:    ns-1
+    Created on:   2018-09-11 05:19:51 +0000 UTC
+    Labels:       <none>
+    Annotations:  <none>
+    Spec:
+      PodSelector:     <none> (Allowing the specific traffic to all pods in this namespace)
+      Allowing ingress traffic:
+        <none> (Selected pods are isolated for ingress connectivity)
+      Allowing egress traffic:
+        <none> (Selected pods are isolated for egress connectivity)
+      Policy Types: Ingress
+
 When running the following command again in shell 2, we should see it eventually timeout and fail (note that rather than waiting for it to time out, you can press `Ctrl` + `C` to quit after about 10 seconds once satisfied that no response will be returned):
 
 ```

@@ -183,7 +183,7 @@ Note down the ARN from this output.
 
 == Create the Pod IAM role
 
-Edit the `templates/pod-role-trust-policy.json` file, replace `{{NodeIAMRoleARN}}` with the IAM Role ARN obtained from the previous step.
+Edit the `templates/pod-role-trust-policy.json` file, replace `{{NodeIAMRoleARN}}` with the IAM Role ARN obtained from the previous step, i.e. the ARN of the role used by the Kubernetes worker nodes.
 
 We will first create a role with no permissions. By configuring the Trusted Policy of the role, we are allowing kube2iam (via the worker node IAM Instance Profile Role) to assume the pod role.  Make note of the role ARN from the response:
 
@@ -296,6 +296,7 @@ From now on, pods in the default namespace will only be able to optain the `MyPo
 === Cleanup
 
     $ kubectl delete -f templates/pod-with-kube2iam.yaml
+    $ aws iam detach-role-policy --role-name MyPodRole --policy-arn arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
     $ aws iam delete-role --role-name MyPodRole
     $ kubectl delete -f templates/kube2iam-ds-eks.yaml
     $ kubectl delete -f templates/kube2iam-rbac.yaml

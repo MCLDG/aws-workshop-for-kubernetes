@@ -256,17 +256,17 @@ The pod configuration file looks like:
 
   $ kubectl exec -it app-pod  bash
 
-Once inside the container, note the `COUNT` variable:
+. Once inside the container, note the `COUNT` variable:
 
-    # env
-    NODE_VERSION=6.11.4
-    HOSTNAME=app-pod
-    .
-    .
-    COUNT=2
-    KUBERNETES_PORT_443_TCP_ADDR=10.100.0.1
-    KUBERNETES_PORT_443_TCP=tcp://10.100.0.1:443
-    _=/usr/bin/env
+  # env
+  NODE_VERSION=6.11.4
+  HOSTNAME=app-pod
+  .
+  .
+  COUNT=2
+  KUBERNETES_PORT_443_TCP_ADDR=10.100.0.1
+  KUBERNETES_PORT_443_TCP=tcp://10.100.0.1:443
+  _=/usr/bin/env
 
 . Observe logs from the pod:
 
