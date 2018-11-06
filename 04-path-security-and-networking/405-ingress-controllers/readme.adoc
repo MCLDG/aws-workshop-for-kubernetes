@@ -4,7 +4,7 @@
 :linkcss:
 :imagesdir: ../../resources/images
 
-This chapter explains how to apply both Nginx and AWS ALB Ingress Controllers to a Kubernetes cluster.
+This chapter explains how to apply Nginx and AWS ALB Ingress Controllers to a Kubernetes cluster.
 These controllers allow you to set rules that control the routing of external traffic to the services in your Kubernetes cluster.
 The role of the Ingress controller is to watch the Kubernetes API server for ingress events, and to action those events.
 For example, creating an Ingress resource is an event. The Ingress controller will act on the event by creating the
@@ -18,8 +18,27 @@ Kubernetes Ingress has two parts:
 There is no default Ingress controller provided in Kubernetes. It may be provided by your platform, or you must install one.
 Since an Ingress controller is not provided on AWS by default, we will install one.
 
+It is also possible to use an AWS NLB in Kubernetes. We will devote a short section to this below.
+
 == Prerequisites
 In order to perform exercises in this chapter, you’ll need to deploy configurations to a Kubernetes cluster. To create an EKS-based Kubernetes cluster, use the link:../../01-path-basics/102-your-first-cluster#create-a-kubernetes-cluster-with-eks[AWS CLI] (recommended). If you wish to create a Kubernetes cluster without EKS, you can instead use link:../../01-path-basics/102-your-first-cluster#alternative-create-a-kubernetes-cluster-with-kops[kops].
+
+== AWS Network Load Balancer
+
+Deploy an application:
+
+  kubectl apply -f templates/echo-deployment.yaml
+
+Deploy an NLB that routes traffic to the pods:
+
+  kubectl apply -f templates/echo-nlb.yaml
+
+Once the NLB is accepting traffic, enter the NLB DNS in a browser window.
+
+Cleanup
+
+  kubectl delete -f templates/echo-nlb.yaml
+  kubectl delete -f templates/echo-deployment.yaml
 
 == Nginx Ingress Controller
 

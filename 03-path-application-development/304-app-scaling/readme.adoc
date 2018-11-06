@@ -14,9 +14,16 @@ HPA can automatically scale pods deployed in a replication controller, deploymen
 
 In order to perform exercises in this chapter, you’ll need to deploy configurations to a Kubernetes cluster. To create an EKS-based Kubernetes cluster, use the link:../../01-path-basics/102-your-first-cluster#create-a-kubernetes-cluster-with-eks[AWS CLI] (recommended). If you wish to create a Kubernetes cluster without EKS, you can instead use link:../../01-path-basics/102-your-first-cluster#alternative-create-a-kubernetes-cluster-with-kops[kops].
 
-Deploy the metrics server:
+Deploy the metrics server. We'll deploy this from the original repo:
 
-    $ kubectl apply -f https://raw.githubusercontent.com/kubernetes/kops/master/addons/metrics-server/v1.8.x.yaml
+    $ cd
+    $ git clone https://github.com/kubernetes-incubator/metrics-server
+    $ cd metrics-server
+    $ kubectl apply -f deploy/1.8+/
+
+Now check the API and make sure metrics server returns a response:
+
+    $ kubectl get --raw "/apis/metrics.k8s.io/v1beta1/nodes" | jq .
 
 == Deploy an application
 
